@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SECRETLY</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+:root{
+  --bg:#060606;--bg2:#0D0D0D;--bg3:#141414;
+  --g1:#1a1a1a;--g2:#2a2a2a;--g3:#3a3a3a;
+  --silver:#E0E0E0;--silver2:#C0C0C0;--silver3:#888;
+  --white:#FFFFFF;--white2:#D8D8D8;
+  --red:#e74c3c;--green:#2ecc71;--orange:#e67e22;
+  --fd:'Cinzel',serif;--fb:'Montserrat',sans-serif;
+  --bottom-bar:64px;--header-h:56px;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--fb);font-size:16px;line-height:1.7;font-weight:500;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;padding-bottom:var(--bottom-bar);min-height:100vh}
+
+/* SCREENS */
+.screen{display:none;min-height:calc(100vh - var(--bottom-bar) - var(--header-h))}
+.screen.active{display:block}
+
+/* HEADER */
+.app-header{position:sticky;top:0;z-index:100;height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(6,6,6,.97);border-bottom:1px solid var(--g2);backdrop-filter:blur(10px)}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo-text{font-family:var(--fd);font-size:16px;letter-spacing:5px;color:var(--silver);font-weight:400}
+.header-back{display:none;align-items:center;gap:6px;font-family:var(--fd);font-size:11px;letter-spacing:2px;color:var(--silver2);cursor:pointer;background:none;border:none}
+.header-back.show{display:flex}
+.header-title{font-family:var(--fd);font-size:13px;letter-spacing:3px;color:var(--white);display:none}
+.header-title.show{display:block}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--bottom-bar);display:flex;background:rgba(6,6,6,.97);border-top:1px solid var(--g2);backdrop-filter:blur(10px);z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:none;background:none;font-family:var(--fd);font-size:9px;letter-spacing:2px;color:var(--silver3);text-transform:uppercase;transition:color .2s;padding-bottom:env(safe-area-inset-bottom,0);position:relative}
+.nav-item.active{color:var(--silver)}
+.nav-item svg{opacity:.45;transition:opacity .2s}
+.nav-item.active svg{opacity:1}
+.nav-badge{position:absolute;top:6px;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:9px;font-family:var(--fd);width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* HOME */
+.hero-mini{padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(192,192,192,.06),transparent 70%)}
+.hero-title{font-family:var(--fd);font-size:36px;letter-spacing:12px;color:var(--white);font-weight:400;margin:14px 0 6px}
+.hero-sub{font-family:var(--fb);font-size:14px;letter-spacing:2px;color:var(--silver2);margin-bottom:20px;font-weight:300}
+.hero-rule{display:flex;align-items:center;gap:10px;width:100%;max-width:240px;margin:0 auto 20px}
+.hero-rule-line{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--g3))}
+.hero-rule-line.r{background:linear-gradient(to left,transparent,var(--g3))}
+.hero-rule-dot{width:3px;height:3px;border-radius:50%;background:var(--silver3)}
+
+/* Feature pills */
+.features-row{display:flex;gap:8px;padding:0 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:20px}
+.features-row::-webkit-scrollbar{display:none}
+.feature-pill{flex-shrink:0;background:var(--g1);border:1px solid var(--g2);padding:10px 16px;display:flex;align-items:center;gap:10px;border-radius:4px}
+.feature-pill-text{font-size:13px;color:var(--silver2);line-height:1.45;font-weight:400}
+.feature-pill-title{font-family:var(--fd);font-size:10px;letter-spacing:2px;color:var(--silver);display:block}
+
+/* Promo */
+.promo-banner{margin:0 16px 20px;background:var(--g1);border:1px solid var(--g2);padding:16px;position:relative;overflow:hidden}
+.promo-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--silver3),transparent)}
+.promo-corner{position:absolute;width:12px;height:12px;border-color:var(--g3);border-style:solid}
+.promo-corner.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.promo-corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+.promo-num{font-family:var(--fd);font-size:42px;color:var(--silver3);font-weight:400;line-height:1}
+.promo-label{font-family:var(--fd);font-size:13px;letter-spacing:3px;color:var(--white);margin:4px 0 8px;text-transform:uppercase}
+.promo-desc{font-size:14px;color:var(--silver3);line-height:1.55;font-weight:400}
+
+/* Quick actions */
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--g2);margin:0 16px 20px}
+.quick-action{background:var(--bg2);padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:background .2s;border:none;text-align:left}
+.quick-action:hover{background:var(--bg3)}
+.quick-action-title{font-family:var(--fd);font-size:11px;letter-spacing:2px;color:var(--silver);text-transform:uppercase}
+.quick-action-sub{font-size:13px;color:var(--silver3);font-weight:400}
+
+/* CATALOG */
+.catalog-search{padding:12px 16px;position:sticky;top:var(--header-h);z-index:50;background:var(--bg);border-bottom:1px solid var(--g1)}
+.search-input{width:100%;background:var(--g1);border:1px solid var(--g2);color:var(--white);padding:11px 16px;font-size:16px;font-family:var(--fb);outline:none;border-radius:4px;font-weight:400}
+.search-input::placeholder{color:var(--silver3)}
+.filter-scroll{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;background:var(--bg);border-bottom:1px solid var(--g1)}
+.filter-scroll::-webkit-scrollbar{display:none}
+.filter-chip{flex-shrink:0;font-family:var(--fd);font-size:9px;letter-spacing:2px;padding:6px 14px;border:1px solid var(--g2);color:var(--silver3);background:var(--bg2);cursor:pointer;white-space:nowrap;transition:all .2s}
+.filter-chip.active{background:var(--silver);color:var(--bg);border-color:var(--silver)}
+.product-item{display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--g1);cursor:pointer;transition:background .2s;background:none;width:100%;text-align:left;border-left:none;border-right:none;border-top:none}
+.product-item:hover{background:var(--g1)}
+.product-thumb{width:72px;height:88px;background:var(--g1);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;border:1px solid var(--g2);overflow:hidden}
+.product-thumb-s{font-family:var(--fd);font-size:28px;color:var(--g3)}
+.product-item-badge{position:absolute;top:4px;left:4px;background:var(--silver);color:var(--bg);font-family:var(--fd);font-size:8px;letter-spacing:1px;padding:2px 6px}
+.product-item-info{flex:1;min-width:0}
+.product-item-brand{font-family:var(--fd);font-size:9px;letter-spacing:3px;color:var(--silver3);text-transform:uppercase;margin-bottom:4px}
+.product-item-name{font-family:var(--fd);font-size:15px;letter-spacing:1px;color:var(--white);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-item-desc{font-size:13px;color:var(--silver3);line-height:1.55;margin-bottom:8px}
+.product-item-price{font-family:var(--fd);font-size:19px;color:var(--white);font-weight:600}
+
+/* PRODUCT DETAIL */
+.product-detail-img{width:100%;aspect-ratio:1/1;background:var(--g1);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--g2)}
+.product-detail-s{font-family:var(--fd);font-size:100px;color:var(--g2)}
+.product-detail-body{padding:20px 16px}
+.product-detail-brand{font-family:var(--fd);font-size:10px;letter-spacing:4px;color:var(--silver3);text-transform:uppercase;margin-bottom:8px}
+.product-detail-name{font-family:var(--fd);font-size:22px;letter-spacing:2px;color:var(--white);margin-bottom:12px}
+.product-detail-price{font-family:var(--fd);font-size:28px;color:var(--white);margin-bottom:16px}
+.product-divider{height:1px;background:var(--g2);margin:16px 0}
+.product-detail-desc{font-size:16px;color:var(--silver2);line-height:1.75;margin-bottom:16px;font-weight:400}
+.product-detail-row{display:flex;gap:8px;margin-bottom:10px}
+.product-detail-label{font-family:var(--fd);font-size:10px;letter-spacing:2px;color:var(--silver3);text-transform:uppercase;width:90px;flex-shrink:0;padding-top:2px}
+.product-detail-val{font-size:15px;color:var(--white2);font-weight:400}
+.btn-buy{width:100%;background:var(--silver);color:var(--bg);font-family:var(--fd);font-size:12px;letter-spacing:4px;border:none;padding:16px;cursor:pointer;margin-top:8px;transition:background .2s}
+.btn-buy:hover{background:var(--white)}
+.btn-tg{width:100%;background:transparent;color:var(--silver2);font-family:var(--fd);font-size:11px;letter-spacing:3px;border:1px solid var(--g3);padding:13px;cursor:pointer;margin-top:8px;transition:all .2s}
+.btn-tg:hover{border-color:var(--silver);color:var(--silver)}
+
+/* ORDERS */
+.orders-empty{padding:60px 24px;text-align:center}
+.orders-empty-title{font-family:var(--fd);font-size:14px;letter-spacing:4px;color:var(--silver3);margin-bottom:10px}
+.orders-empty-sub{font-size:14px;color:var(--silver3);font-style:italic}
+.order-item{padding:16px;border-bottom:1px solid var(--g1);cursor:pointer;transition:background .2s}
+.order-item:hover{background:var(--g1)}
+.order-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px}
+.order-item-id{font-family:var(--fd);font-size:11px;letter-spacing:2px;color:var(--silver2)}
+.order-item-product{font-size:15px;color:var(--white);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.order-item-date{font-size:13px;color:var(--silver3)}
+.badge{font-family:var(--fd);font-size:8px;letter-spacing:2px;padding:4px 10px;text-transform:uppercase;white-space:nowrap}
+.badge-new{background:var(--g2);color:var(--silver2)}
+.badge-processing{background:rgba(230,126,34,.15);color:var(--orange);border:1px solid rgba(230,126,34,.3)}
+.badge-shipping{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-done{background:rgba(192,192,192,.1);color:var(--silver);border:1px solid var(--g3)}
+.badge-cancelled{background:rgba(231,76,60,.15);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;display:inline-block;margin-left:6px;vertical-align:middle}
+
+/* ORDER DETAIL */
+.order-detail-wrap{padding:16px}
+.order-status-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.order-card{background:var(--bg2);border:1px solid var(--g2);padding:16px;margin-bottom:16px;position:relative}
+.order-card::before{content:'';position:absolute;top:8px;left:8px;width:10px;height:10px;border-top:1px solid var(--g3);border-left:1px solid var(--g3)}
+.order-card::after{content:'';position:absolute;bottom:8px;right:8px;width:10px;height:10px;border-bottom:1px solid var(--g3);border-right:1px solid var(--g3)}
+.ofield{display:grid;grid-template-columns:100px 1fr;gap:8px;margin-bottom:10px}
+.ofield-label{font-family:var(--fd);font-size:9px;letter-spacing:2px;color:var(--silver3);text-transform:uppercase;padding-top:2px}
+.ofield-value{font-size:15px;color:var(--white);font-weight:400}
+
+/* CHAT */
+.chat-section{background:var(--bg2);border:1px solid var(--g2);margin-bottom:80px}
+.chat-header-row{padding:12px 16px;border-bottom:1px solid var(--g2);font-family:var(--fd);font-size:10px;letter-spacing:3px;color:var(--silver);text-transform:uppercase}
+.chat-msgs{min-height:120px;max-height:280px;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.chat-msg{max-width:82%}
+.chat-msg.own{align-self:flex-end}
+.chat-meta{font-family:var(--fd);font-size:9px;letter-spacing:1px;color:var(--silver3);margin-bottom:4px}
+.chat-msg.own .chat-meta{text-align:right}
+.bubble{padding:11px 15px;font-size:15px;line-height:1.6}
+.bubble-other{background:var(--g1);border:1px solid var(--g2);color:var(--white2);border-radius:0 8px 8px 8px}
+.bubble-own{background:var(--g2);border:1px solid var(--g3);color:var(--white);border-radius:8px 0 8px 8px}
+.bubble-system{background:transparent;border:1px solid var(--g2);color:var(--silver3);font-style:italic;border-radius:4px;font-size:12px;text-align:center;align-self:center;max-width:100%;padding:8px 12px}
+.chat-input-row{display:flex;gap:1px;border-top:1px solid var(--g2)}
+.chat-txt{flex:1;background:var(--bg);border:none;color:var(--white);padding:13px 14px;font-size:16px;font-family:var(--fb);outline:none;resize:none;font-weight:400}
+.chat-btn{background:var(--silver);color:var(--bg);border:none;padding:0 18px;font-family:var(--fd);font-size:10px;letter-spacing:2px;cursor:pointer;white-space:nowrap}
+.chat-btn:hover{background:var(--white)}
+
+/* FORM */
+.order-form{padding:16px}
+.form-group{margin-bottom:16px}
+.form-label{font-family:var(--fd);font-size:10px;letter-spacing:2px;color:var(--silver2);text-transform:uppercase;display:block;margin-bottom:8px}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--g2);color:var(--white);padding:13px 16px;font-size:16px;font-family:var(--fb);outline:none;transition:border-color .2s;font-weight:400}
+.form-input:focus{border-color:var(--silver2)}
+.form-textarea{width:100%;background:var(--bg);border:1px solid var(--g2);color:var(--white);padding:13px 16px;font-size:16px;font-family:var(--fb);outline:none;resize:vertical;min-height:80px;font-weight:400}
+.form-textarea:focus{border-color:var(--silver2)}
+.form-check{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;cursor:pointer}
+.form-check input{margin-top:3px;accent-color:var(--silver);width:16px;height:16px;flex-shrink:0}
+.form-check label{font-size:14px;color:var(--silver2);line-height:1.65;cursor:pointer;font-weight:400}
+.btn-submit{width:100%;background:var(--silver);color:var(--bg);font-family:var(--fd);font-size:12px;letter-spacing:4px;border:none;padding:16px;cursor:pointer;margin-top:4px}
+.btn-submit:hover{background:var(--white)}
+.err-msg{font-size:12px;color:var(--red);margin-top:6px;font-family:var(--fd);letter-spacing:1px}
+
+/* PROFILE */
+.profile-wrap{padding:16px}
+.profile-avatar{width:72px;height:72px;background:var(--g1);border:1px solid var(--g2);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-family:var(--fd);font-size:28px;color:var(--silver3)}
+.profile-name{font-family:var(--fd);font-size:18px;letter-spacing:4px;color:var(--white);text-align:center;margin-bottom:4px}
+.profile-email{font-size:13px;color:var(--silver3);text-align:center;margin-bottom:24px}
+.profile-card{background:var(--bg2);border:1px solid var(--g2);padding:0 16px;margin-bottom:16px}
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--g1)}
+.profile-row:last-child{border-bottom:none}
+.profile-row-label{font-family:var(--fd);font-size:10px;letter-spacing:2px;color:var(--silver3);text-transform:uppercase}
+.profile-row-val{font-size:15px;color:var(--white);font-weight:400}
+
+/* SECTION TITLE */
+.section-title{font-family:var(--fd);font-size:10px;letter-spacing:5px;color:var(--silver3);text-transform:uppercase;padding:16px 16px 8px}
+
+/* TOAST */
+#toast{position:fixed;top:70px;left:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{font-family:var(--fd);font-size:10px;letter-spacing:2px;padding:12px 16px;background:var(--bg2);color:var(--white);border:1px solid var(--g2);border-left:2px solid var(--silver);animation:slideIn .3s ease}
+.toast-item.err{border-left-color:var(--red)}
+.toast-item.ok{border-left-color:var(--green)}
+@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.pb80{padding-bottom:80px}
+.mt8{margin-top:8px}
+.mt16{margin-top:16px}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <button class="header-back" id="headerBack" onclick="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Назад
+  </button>
+  <div class="header-logo" id="headerLogo">
+    <!-- Готический замок — финальная версия -->
+    <svg width="22" height="28" viewBox="0 0 130 160" fill="none">
+      <path d="M32 80L32 52Q32 10 65 4Q98 10 98 52L98 80" stroke="#C0C0C0" stroke-width="3" stroke-linecap="butt" fill="none"/>
+      <path d="M42 80L42 55Q42 18 65 13Q88 18 88 55L88 80" stroke="#1e1e1e" stroke-width="1.5" fill="none"/>
+      <polygon points="65,4 58,-6 65,-16 72,-6" fill="#C0C0C0"/>
+      <polygon points="32,80 24,68 32,56 40,68" fill="#C0C0C0"/>
+      <polygon points="98,80 90,68 98,56 106,68" fill="#C0C0C0"/>
+      <circle cx="52" cy="14" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.5"/>
+      <circle cx="65" cy="8" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.5"/>
+      <circle cx="78" cy="14" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.5"/>
+      <rect x="16" y="78" width="98" height="74" rx="3" fill="#0D0D0D" stroke="#C0C0C0" stroke-width="2.2"/>
+      <rect x="24" y="86" width="82" height="58" rx="2" fill="none" stroke="#1e1e1e" stroke-width="1"/>
+      <circle cx="40" cy="115" r="9" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="90" cy="115" r="9" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+      <path d="M30 90L36 96 M100 90L94 96 M30 148L36 142 M100 148L94 142" stroke="#2a2a2a" stroke-width="1.2" fill="none"/>
+      <circle cx="65" cy="108" r="14" fill="#080808"/>
+      <circle cx="65" cy="104" r="8" fill="none" stroke="#C0C0C0" stroke-width="1.6"/>
+      <path d="M59 109L59 122Q59 126 65 126Q71 126 71 122L71 109" fill="none" stroke="#C0C0C0" stroke-width="1.6"/>
+    </svg>
+    <span class="header-logo-text">SECRETLY</span>
+  </div>
+  <div class="header-title" id="headerTitle"></div>
+  <div style="width:60px"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="hero-mini">
+    <svg width="80" height="100" viewBox="0 0 130 160" fill="none">
+      <path d="M32 80L32 52Q32 10 65 4Q98 10 98 52L98 80" stroke="#C0C0C0" stroke-width="2.5" fill="none"/>
+      <path d="M42 80L42 55Q42 18 65 13Q88 18 88 55L88 80" stroke="#1e1e1e" stroke-width="1.2" fill="none"/>
+      <polygon points="65,4 58,-5 65,-14 72,-5" fill="#C0C0C0"/>
+      <polygon points="32,80 25,69 32,58 39,69" fill="#C0C0C0"/>
+      <polygon points="98,80 91,69 98,58 105,69" fill="#C0C0C0"/>
+      <circle cx="52" cy="14" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.4"/>
+      <circle cx="65" cy="8" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.4"/>
+      <circle cx="78" cy="14" r="7" fill="none" stroke="#C0C0C0" stroke-width="1.4"/>
+      <rect x="16" y="78" width="98" height="74" rx="3" fill="#0D0D0D" stroke="#C0C0C0" stroke-width="2"/>
+      <rect x="24" y="86" width="82" height="58" rx="2" fill="none" stroke="#1e1e1e" stroke-width="0.9"/>
+      <circle cx="40" cy="115" r="9" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="90" cy="115" r="9" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+      <path d="M30 90L36 96 M100 90L94 96 M30 148L36 142 M100 148L94 142" stroke="#2a2a2a" stroke-width="1.1" fill="none"/>
+      <circle cx="65" cy="108" r="14" fill="#080808"/>
+      <circle cx="65" cy="104" r="8" fill="none" stroke="#C0C0C0" stroke-width="1.5"/>
+      <path d="M59 109L59 122Q59 126 65 126Q71 126 71 122L71 109" fill="none" stroke="#C0C0C0" stroke-width="1.5"/>
+    </svg>
+    <p style="font-family:var(--fd);font-size:9px;letter-spacing:5px;color:var(--silver3);margin-top:12px;text-transform:uppercase">Магазин одежды</p>
+    <h1 class="hero-title">SECRETLY</h1>
+    <div class="hero-rule">
+      <div class="hero-rule-line"></div>
+      <div class="hero-rule-dot"></div><div class="hero-rule-dot"></div><div class="hero-rule-dot"></div>
+      <div class="hero-rule-line r"></div>
+    </div>
+    <p class="hero-sub">твой стиль — твои правила</p>
+  </div>
+
+  <div class="features-row">
+    <div class="feature-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="feature-pill-text"><span class="feature-pill-title">Гарантия</span>100% оригиналы</div>
+    </div>
+    <div class="feature-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 4v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <div class="feature-pill-text"><span class="feature-pill-title">Доставка</span>По всей России</div>
+    </div>
+    <div class="feature-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="feature-pill-text"><span class="feature-pill-title">Поддержка</span>24/7 онлайн</div>
+    </div>
+  </div>
+
+  <div class="section-title">Актуальные акции</div>
+  <div style="display:flex;gap:12px;padding:0 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:20px">
+    <div class="promo-banner" style="min-width:190px;flex:1">
+      <div class="promo-corner tl"></div><div class="promo-corner br"></div>
+      <div class="promo-num">5%</div>
+      <div class="promo-label">От 2 товаров</div>
+      <div class="promo-desc">Скидка на всю сумму заказа</div>
+    </div>
+    <div class="promo-banner" style="min-width:190px;flex:1">
+      <div class="promo-corner tl"></div><div class="promo-corner br"></div>
+      <div class="promo-num">7%</div>
+      <div class="promo-label">За отзыв</div>
+      <div class="promo-desc">На следующую покупку</div>
+    </div>
+  </div>
+
+  <div class="section-title">Быстрые действия</div>
+  <div class="quick-actions">
+    <button class="quick-action" onclick="navTo('catalog')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span class="quick-action-title">Каталог</span>
+      <span class="quick-action-sub">Все товары</span>
+    </button>
+    <button class="quick-action" onclick="navTo('orders')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <span class="quick-action-title">Заявки</span>
+      <span class="quick-action-sub">Мои заказы</span>
+    </button>
+    <button class="quick-action" onclick="openNewOrder()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span class="quick-action-title">Новая</span>
+      <span class="quick-action-sub">Оформить заявку</span>
+    </button>
+    <button class="quick-action" onclick="openTelegram()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#888"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.24-.213-.054-.333-.373-.12L7.14 13.36 4.18 12.46c-.653-.204-.666-.653.136-.966l10.558-4.071c.54-.196 1.02.131.82.798z"/></svg>
+      <span class="quick-action-title">Telegram</span>
+      <span class="quick-action-sub">@secretlyshop</span>
+    </button>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<div class="screen" id="screen-catalog">
+  <div class="catalog-search">
+    <input class="search-input" type="text" id="searchInput" placeholder="Поиск..." oninput="filterProducts()"/>
+  </div>
+  <div class="filter-scroll">
+    <div class="filter-chip active" data-cat="all" onclick="setCat(this)">Все</div>
+    <div class="filter-chip" data-cat="tshirts" onclick="setCat(this)">Футболки</div>
+    <div class="filter-chip" data-cat="shorts" onclick="setCat(this)">Шорты</div>
+    <div class="filter-chip" data-cat="longsleeves" onclick="setCat(this)">Лонгсливы</div>
+    <div class="filter-chip" data-cat="hoodies" onclick="setCat(this)">Худи</div>
+    <div class="filter-chip" data-cat="jersey" onclick="setCat(this)">Джерси</div>
+    <div class="filter-chip" data-cat="pants" onclick="setCat(this)">Штаны</div>
+    <div class="filter-chip" data-cat="footwear" onclick="setCat(this)">Обувь</div>
+    <div class="filter-chip" data-cat="sweaters" onclick="setCat(this)">Свитеры</div>
+    <div class="filter-chip" data-cat="jeans" onclick="setCat(this)">Джинсы</div>
+    <div class="filter-chip" data-cat="sweatshirts" onclick="setCat(this)">Свитшоты</div>
+    <div class="filter-chip" data-cat="zips" onclick="setCat(this)">Зипки</div>
+    <div class="filter-chip" data-cat="polo" onclick="setCat(this)">Поло</div>
+    <div class="filter-chip" data-cat="bombers" onclick="setCat(this)">Бомберы</div>
+    <div class="filter-chip" data-cat="jackets" onclick="setCat(this)">Куртки</div>
+  </div>
+  <div id="catalogList"></div>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div class="screen" id="screen-product">
+  <div id="productDetail" class="pb80"></div>
+</div>
+
+<!-- ORDERS -->
+<div class="screen" id="screen-orders">
+  <div id="ordersList"></div>
+</div>
+
+<!-- ORDER DETAIL -->
+<div class="screen" id="screen-order-detail">
+  <div class="order-detail-wrap pb80" id="orderDetailContent"></div>
+</div>
+
+<!-- NEW ORDER -->
+<div class="screen" id="screen-new-order">
+  <div class="order-form pb80">
+    <div class="form-group">
+      <label class="form-label">Товар / описание *</label>
+      <textarea class="form-textarea" id="o-product" rows="3" placeholder="Например: Supreme Box Logo Hoodie, размер L, белый"></textarea>
+      <div class="err-msg" id="err-product"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Полное ФИО *</label>
+      <input class="form-input" type="text" id="o-fio" placeholder="Иванов Иван Иванович"/>
+      <div class="err-msg" id="err-fio"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Телефон *</label>
+      <input class="form-input" type="tel" id="o-phone" placeholder="+7 (999) 000-00-00"/>
+      <div class="err-msg" id="err-phone"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Адрес ПВЗ *</label>
+      <input class="form-input" type="text" id="o-addr" placeholder="г. Краснодар, ул. Ленина, 10"/>
+      <div class="err-msg" id="err-addr"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Название ПВЗ *</label>
+      <input class="form-input" type="text" id="o-pvz" placeholder="СДЭК / Boxberry / OZON и т.д."/>
+      <div class="err-msg" id="err-pvz"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Комментарий</label>
+      <textarea class="form-textarea" id="o-comment" placeholder="Дополнительно..."></textarea>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="o-pdp"/>
+      <label for="o-pdp">Согласен на обработку персональных данных согласно ФЗ № 152-ФЗ</label>
+    </div>
+    <div class="err-msg" id="err-pdp"></div>
+    <button class="btn-submit mt8" onclick="submitOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen" id="screen-profile">
+  <div id="profileContent"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="navTo('home')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    Главная
+  </button>
+  <button class="nav-item" id="nav-catalog" onclick="navTo('catalog')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    Каталог
+  </button>
+  <button class="nav-item" id="nav-orders" onclick="navTo('orders')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    Заявки
+    <span class="nav-badge" id="ordersBadge" style="display:none">0</span>
+  </button>
+  <button class="nav-item" id="nav-profile" onclick="navTo('profile')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Профиль
+  </button>
+</nav>
+
+<script>
+// ═══ TELEGRAM BOT CONFIG ═══
+// Замени на свои данные:
+const BOT_TOKEN = '8686309427:AAE0WQGLUocjnIjzt1n3aTjdSc34THRifYs';
+const CHAT_ID   = '-5219337098';
+
+async function sendToTelegram(order) {
+  
+  const text = [
+    '🔒 *НОВАЯ ЗАЯВКА SECRETLY*',
+    '',
+    `📦 *Товар:* ${order.product}`,
+    `👤 *ФИО:* ${order.fio}`,
+    `📞 *Телефон:* ${order.phone}`,
+    `📍 *Адрес ПВЗ:* ${order.pvzAddr}`,
+    `🏪 *ПВЗ:* ${order.pvzName}`,
+    order.comment ? `💬 *Комментарий:* ${order.comment}` : '',
+    '',
+    `🆔 *ID заявки:* #${order.id.slice(-6).toUpperCase()}`,
+    `👤 *Клиент TG:* ${order.userName}`,
+    `🕐 *Время:* ${order.createdAt}`,
+  ].filter(Boolean).join('\n');
+
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text,
+        parse_mode: 'Markdown',
+      })
+    });
+  } catch(e) {
+    console.error('TG send error:', e);
+  }
+}
+
+const tg = window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.setHeaderColor('#060606');tg.setBackgroundColor('#060606')}
+
+const DB={g(k){try{return JSON.parse(localStorage.getItem('sc_'+k))}catch{return null}},s(k,v){localStorage.setItem('sc_'+k,JSON.stringify(v))}};
+function initDB(){if(!DB.g('orders'))DB.s('orders',[])}
+const gOrders=()=>DB.g('orders')||[];
+const sOrders=o=>DB.s('orders',o);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const now=()=>new Date().toLocaleString('ru-RU');
+const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';
+
+const tgUser=tg?.initDataUnsafe?.user||{id:'local',first_name:'Пользователь',username:''};
+const userName=[tgUser.first_name,tgUser.last_name].filter(Boolean).join(' ')||'Пользователь';
+const userHandle=tgUser.username?'@'+tgUser.username:'';
+
+const SL={new:'Новая',processing:'В обработке',shipping:'Отправлено',done:'Завершена',cancelled:'Отменена'};
+const SC={new:'badge-new',processing:'badge-processing',shipping:'badge-shipping',done:'badge-done',cancelled:'badge-cancelled'};
+const badge=s=>`<span class="badge ${SC[s]||'badge-new'}">${SL[s]||s}</span>`;
+
+// Только новые вещи, только одежда и обувь
+const PRODUCTS=[
+  {
+    id:1,
+    brand:'Mastermind World',
+    name:'Longsleeve Madonna Nudes 1979',
+    desc:'Новый, с бирками. Лонгслив оверсайз белый. Принт Madonna Nudes 1979 с черепом и костями. Плотный хлопок, швы оверлок, чистый ворот без катышей.',
+    price:'1 890 ₽',
+    cat:'longsleeves',
+    img:'images/mastermind-madonna-ls.jpg',
+    sizes:['S','M','L','XL','2XL'],
+    size:'S / M / L / XL / 2XL',
+    color:'Белый',
+    material:'Хлопок',
+    details:[
+      'Принт не трескается — высококачественная печать',
+      'Швы оверлок — не осыпаются',
+      'Воротник — двойной шов',
+      'Длинный рукав оверсайз',
+    ]
+  },
+];
+
+let currentCat='all';
+let searchQuery='';
+let navStack=['home'];
+const mainScreens=['home','catalog','orders','profile'];
+
+function navTo(screen){
+  if(mainScreens.includes(screen)){
+    navStack=[screen];
+    setHeaderMode('logo');
+    updateBottomNav(screen);
+  }
+  showScreen(screen);
+  if(screen==='catalog')renderCatalog();
+  if(screen==='orders')renderOrders();
+  if(screen==='profile')renderProfile();
+  updateOrderBadge();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById('screen-'+id);
+  if(t)t.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function pushScreen(id,title=''){
+  navStack.push(id);
+  setHeaderMode('back',title);
+  showScreen(id);
+}
+
+function goBack(){
+  if(navStack.length<=1)return;
+  navStack.pop();
+  const prev=navStack[navStack.length-1];
+  if(mainScreens.includes(prev)){setHeaderMode('logo');updateBottomNav(prev);}
+  else{const t={'new-order':'Новая заявка','order-detail':'Заявка','product':'Товар'};setHeaderMode('back',t[prev]||'')}
+  showScreen(prev);
+  if(prev==='orders')renderOrders();
+  if(prev==='catalog')renderCatalog();
+}
+
+function setHeaderMode(mode,title=''){
+  const back=document.getElementById('headerBack');
+  const logo=document.getElementById('headerLogo');
+  const titleEl=document.getElementById('headerTitle');
+  if(mode==='logo'){back.classList.remove('show');logo.style.display='flex';titleEl.classList.remove('show');titleEl.textContent=''}
+  else{back.classList.add('show');logo.style.display='none';if(title){titleEl.classList.add('show');titleEl.textContent=title}}
+}
+
+function updateBottomNav(active){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('nav-'+active);
+  if(el)el.classList.add('active');
+}
+
+function renderCatalog(){
+  const list=document.getElementById('catalogList');
+  const filtered=PRODUCTS.filter(p=>{
+    const mc=currentCat==='all'||p.cat===currentCat;
+    const ms=!searchQuery||p.name.toLowerCase().includes(searchQuery.toLowerCase())||p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    return mc&&ms;
+  });
+  if(filtered.length===0){list.innerHTML=`<div style="padding:40px;text-align:center;font-style:italic;color:var(--silver3);font-size:15px">Ничего не найдено</div>`;return}
+  list.innerHTML=filtered.map(p=>`
+    <button class="product-item" onclick="openProduct(${p.id})">
+      <div class="product-thumb">
+        <span class="product-thumb-s">S</span>
+      </div>
+      <div class="product-item-info">
+        <div class="product-item-brand">${p.brand}</div>
+        <div class="product-item-name">${p.name}</div>
+        <div class="product-item-desc">${p.desc.slice(0,65)}...</div>
+        <div class="product-item-price">${p.price}</div>
+      </div>
+    </button>`).join('');
+}
+
+function setCat(el){
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentCat=el.dataset.cat;
+  renderCatalog();
+}
+
+function filterProducts(){
+  searchQuery=document.getElementById('searchInput').value;
+  renderCatalog();
+}
+
+function openProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!p)return;
+  const catLabels={tshirts:'Футболки',shorts:'Шорты',longsleeves:'Лонгсливы',hoodies:'Худи',jersey:'Джерси',pants:'Штаны',footwear:'Обувь',sweaters:'Свитеры',jeans:'Джинсы',sweatshirts:'Свитшоты',zips:'Зипки/Олимпийки',polo:'Поло',bombers:'Бомберы',jackets:'Куртки'};
+  const detailsHtml = p.details ? p.details.map(d=>`<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:14px;color:#C0C0C0">${d}</span></div>`).join('') : '';
+  const sizesHtml = p.sizes ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">${p.sizes.map(s=>`<span style="font-family:var(--fd);font-size:11px;letter-spacing:2px;color:var(--white);border:1px solid var(--g3);padding:5px 12px">${s}</span>`).join('')}</div>` : `<span style="font-size:14px;color:var(--white2)">${p.size}</span>`;
+  document.getElementById('productDetail').innerHTML=`
+    <div class="product-detail-img" id="pd-img-wrap">
+      ${p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';document.getElementById('pd-fallback').style.display='flex'" alt="${p.name}"/><span class="product-detail-s" id="pd-fallback" style="display:none">S</span>` : `<span class="product-detail-s">S</span>`}
+    </div>
+    <div class="product-detail-body">
+      <div class="product-detail-brand">${p.brand}</div>
+      <div class="product-detail-name">${p.name}</div>
+      <div class="product-detail-price">${p.price}</div>
+      <div class="product-divider"></div>
+      <div class="product-detail-desc">${p.desc}</div>
+      <div class="product-divider"></div>
+      <div class="product-detail-row"><span class="product-detail-label">Размеры</span>${sizesHtml}</div>
+      ${p.color?`<div class="product-detail-row" style="margin-top:10px"><span class="product-detail-label">Цвет</span><span class="product-detail-val">${p.color}</span></div>`:''}
+      ${p.material?`<div class="product-detail-row"><span class="product-detail-label">Материал</span><span class="product-detail-val">${p.material}</span></div>`:''}
+      <div class="product-detail-row"><span class="product-detail-label">Категория</span><span class="product-detail-val">${catLabels[p.cat]||p.cat}</span></div>
+      ${detailsHtml ? `<div class="product-divider"></div><div style="font-family:var(--fd);font-size:10px;letter-spacing:3px;color:var(--silver3);text-transform:uppercase;margin-bottom:12px">Качество</div>${detailsHtml}` : ''}
+      <div class="product-divider"></div>
+      <button class="btn-buy" onclick="openOrderFromProduct('${esc(p.brand+' '+p.name)}','${p.price}',${JSON.stringify(p.sizes||[])})">ОФОРМИТЬ ЗАЯВКУ</button>
+      <button class="btn-tg" onclick="openTelegram()">↗ Написать в Telegram</button>
+    </div>`;
+  pushScreen('product',p.name);
+}
+
+function orderProduct(product){
+  document.getElementById('o-product').value=product;
+  pushScreen('new-order','Новая заявка');
+}
+
+function renderOrders(){
+  const orders=gOrders().reverse();
+  const unread=orders.filter(o=>o.msgs&&o.msgs.some(m=>m.role!=='client'&&!m.rc)).length;
+  updateOrderBadge(unread);
+  const el=document.getElementById('ordersList');
+  if(orders.length===0){
+    el.innerHTML=`<div class="orders-empty"><div class="orders-empty-title">НЕТ ЗАЯВОК</div><div class="orders-empty-sub">Создайте первую заявку</div><button class="btn-buy" style="margin-top:20px;max-width:220px;margin-left:auto;margin-right:auto;display:block" onclick="openNewOrder()">Новая заявка</button></div>`;
+    return;
+  }
+  el.innerHTML=orders.map(o=>`
+    <div class="order-item" onclick="openOrderDetail('${o.id}')">
+      <div class="order-item-top">
+        <span class="order-item-id">#${o.id.slice(-6).toUpperCase()}</span>
+        ${badge(o.status)}
+        ${o.msgs&&o.msgs.some(m=>m.role!=='client'&&!m.rc)?'<span class="notif-dot"></span>':''}
+      </div>
+      <div class="order-item-product">${esc(o.product).slice(0,52)}</div>
+      <div class="order-item-date">${o.createdAt}</div>
+    </div>`).join('');
+}
+
+function openOrderDetail(id){
+  const orders=gOrders();
+  const order=orders.find(o=>o.id===id);
+  if(!order)return;
+  order.msgs.forEach(m=>{if(m.role!=='client')m.rc=true});
+  sOrders(orders);
+  const msgs=order.msgs.map(m=>`
+    <div class="chat-msg ${m.role==='client'?'own':''}">
+      <div class="chat-meta">${m.role==='client'?'Вы':'SECRETLY'} · ${m.time}</div>
+      <div class="bubble ${m.is_system?'bubble-system':m.role==='client'?'bubble-own':'bubble-other'}">${esc(m.text)}</div>
+    </div>`).join('');
+  document.getElementById('orderDetailContent').innerHTML=`
+    <div class="order-status-row">${badge(order.status)}<span style="font-size:12px;color:var(--silver3)">${order.createdAt}</span></div>
+    <div class="order-card">
+      <div class="ofield"><span class="ofield-label">Товар</span><span class="ofield-value">${esc(order.product)}</span></div>
+      <div class="ofield"><span class="ofield-label">ФИО</span><span class="ofield-value">${esc(order.fio)}</span></div>
+      <div class="ofield"><span class="ofield-label">Телефон</span><span class="ofield-value">${esc(order.phone)}</span></div>
+      <div class="ofield"><span class="ofield-label">Адрес ПВЗ</span><span class="ofield-value">${esc(order.pvzAddr)}</span></div>
+      <div class="ofield"><span class="ofield-label">ПВЗ</span><span class="ofield-value">${esc(order.pvzName)}</span></div>
+      ${order.comment?`<div class="ofield"><span class="ofield-label">Комм.</span><span class="ofield-value">${esc(order.comment)}</span></div>`:''}
+    </div>
+    <div class="chat-section">
+      <div class="chat-header-row">Переписка</div>
+      <div class="chat-msgs" id="chatMsgs">${msgs||'<div style="text-align:center;font-style:italic;color:var(--silver3);padding:24px;font-size:14px">Сообщений пока нет</div>'}</div>
+      <div class="chat-input-row">
+        <textarea class="chat-txt" id="chatTxt" placeholder="Написать..." rows="2"></textarea>
+        <button class="chat-btn" onclick="sendMsg('${id}')">ОТПРАВИТЬ</button>
+      </div>
+    </div>`;
+  pushScreen('order-detail','Заявка #'+id.slice(-6).toUpperCase());
+  setTimeout(()=>{const c=document.getElementById('chatMsgs');if(c)c.scrollTop=c.scrollHeight},60);
+}
+
+function sendMsg(orderId){
+  const txt=document.getElementById('chatTxt').value.trim();
+  if(!txt)return;
+  const orders=gOrders();
+  const order=orders.find(o=>o.id===orderId);
+  if(!order)return;
+  if(!order.msgs)order.msgs=[];
+  order.msgs.push({role:'client',text:txt,time:now(),rc:true});
+  sOrders(orders);
+  document.getElementById('chatTxt').value='';
+  const msgs=order.msgs.map(m=>`
+    <div class="chat-msg ${m.role==='client'?'own':''}">
+      <div class="chat-meta">${m.role==='client'?'Вы':'SECRETLY'} · ${m.time}</div>
+      <div class="bubble ${m.is_system?'bubble-system':m.role==='client'?'bubble-own':'bubble-other'}">${esc(m.text)}</div>
+    </div>`).join('');
+  const c=document.getElementById('chatMsgs');
+  if(c){c.innerHTML=msgs;c.scrollTop=c.scrollHeight}
+  toast('Отправлено');
+}
+
+function openNewOrder(prefill='', sizes=[]){
+  // Pre-fill product if called from product page
+  pushScreen('new-order','Новая заявка');
+  setTimeout(()=>{
+    if(prefill) document.getElementById('o-product').value=prefill;
+    // Add size selector if sizes provided
+    if(sizes && sizes.length > 0){
+      const pg = document.getElementById('o-product').parentNode;
+      // Insert size picker after product textarea if not already there
+      if(!document.getElementById('size-picker')){
+        const div = document.createElement('div');
+        div.id='size-picker';
+        div.style.cssText='margin-bottom:16px';
+        div.innerHTML=`<div class="form-label" style="margin-bottom:8px">Выберите размер *</div><div style="display:flex;gap:8px;flex-wrap:wrap">${sizes.map(s=>`<button type="button" class="size-btn" onclick="selectSize(this,'${s}')" style="font-family:var(--fd);font-size:11px;letter-spacing:2px;color:var(--white2);border:1px solid var(--g3);padding:8px 16px;background:var(--bg);cursor:pointer;transition:all .2s">${s}</button>`).join('')}</div>`;
+        pg.parentNode.insertBefore(div, pg.nextSibling);
+      }
+    }
+  }, 100);
+}
+
+function selectSize(el, size){
+  document.querySelectorAll('.size-btn').forEach(b=>{b.style.background='var(--bg)';b.style.borderColor='var(--g3)';b.style.color='var(--white2)'});
+  el.style.background='var(--silver)';el.style.borderColor='var(--silver)';el.style.color='var(--bg)';
+  // Append size to product field
+  const prod = document.getElementById('o-product');
+  const base = prod.value.replace(/,\s*размер\s*\S+/,'');
+  prod.value = base + ', размер ' + size;
+}
+
+function openOrderFromProduct(name, price, sizes){
+  openNewOrder(name + ', ' + price, sizes);
+}
+
+function submitOrder(){
+  const product=document.getElementById('o-product').value.trim();
+  const fio=document.getElementById('o-fio').value.trim();
+  const phone=document.getElementById('o-phone').value.trim();
+  const addr=document.getElementById('o-addr').value.trim();
+  const pvz=document.getElementById('o-pvz').value.trim();
+  const comment=document.getElementById('o-comment').value.trim();
+  const pdp=document.getElementById('o-pdp').checked;
+  ['product','fio','phone','addr','pvz','pdp'].forEach(k=>{const el=document.getElementById('err-'+k);if(el)el.textContent=''});
+  let ok=true;
+  if(!product){document.getElementById('err-product').textContent='Укажите товар';ok=false}
+  if(!fio){document.getElementById('err-fio').textContent='Укажите ФИО';ok=false}
+  if(!phone){document.getElementById('err-phone').textContent='Укажите телефон';ok=false}
+  if(!addr){document.getElementById('err-addr').textContent='Укажите адрес ПВЗ';ok=false}
+  if(!pvz){document.getElementById('err-pvz').textContent='Укажите название ПВЗ';ok=false}
+  if(!pdp){document.getElementById('err-pdp').textContent='Необходимо согласие на обработку данных';ok=false}
+  if(!ok)return;
+  const orders=gOrders();
+  orders.push({id:uid(),userId:tgUser.id,userName,product,fio,phone,pvzAddr:addr,pvzName:pvz,comment,status:'new',createdAt:now(),msgs:[]});
+  sOrders(orders);
+  sendToTelegram(order);
+  if(tg)tg.HapticFeedback?.notificationOccurred('success');
+  toast('Заявка отправлена!','ok');
+  ['o-product','o-fio','o-phone','o-addr','o-pvz','o-comment'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('o-pdp').checked=false;
+  setTimeout(()=>navTo('orders'),600);
+}
+
+function renderProfile(){
+  const orders=gOrders();
+  document.getElementById('profileContent').innerHTML=`
+    <div class="profile-wrap pb80">
+      <div class="profile-avatar">${userName.charAt(0).toUpperCase()}</div>
+      <div class="profile-name">${userName}</div>
+      <div class="profile-email">${userHandle||'Telegram пользователь'}</div>
+      <div class="profile-card">
+        <div class="profile-row"><span class="profile-row-label">Заявок</span><span class="profile-row-val">${orders.length}</span></div>
+        <div class="profile-row"><span class="profile-row-label">Новых</span><span class="profile-row-val">${orders.filter(o=>o.status==='new').length}</span></div>
+        <div class="profile-row"><span class="profile-row-label">Завершено</span><span class="profile-row-val">${orders.filter(o=>o.status==='done').length}</span></div>
+      </div>
+      <div class="section-title" style="padding-left:0">Контакты</div>
+      <div class="profile-card">
+        <div class="profile-row" onclick="openTelegram()" style="cursor:pointer">
+          <span class="profile-row-label">Telegram</span>
+          <span class="profile-row-val" style="color:var(--silver)">@secretlyshop ↗</span>
+        </div>
+        <div class="profile-row"><span class="profile-row-label">Авито</span><span class="profile-row-val">SECRETLY</span></div>
+      </div>
+      <div class="section-title" style="padding-left:0">Акции</div>
+      <div class="profile-card">
+        <div class="profile-row"><span class="profile-row-label">От 2 товаров</span><span class="profile-row-val" style="color:var(--silver)">Скидка 5%</span></div>
+        <div class="profile-row"><span class="profile-row-label">За отзыв</span><span class="profile-row-val" style="color:var(--silver)">Скидка 7%</span></div>
+      </div>
+      <button class="btn-tg mt16" onclick="openTelegram()">↗ Открыть @secretlyshop</button>
+    </div>`;
+}
+
+function openTelegram(){
+  if(tg){tg.openLink('https://t.me/secretlyshop')}
+  else{window.open('https://t.me/secretlyshop','_blank')}
+}
+
+function updateOrderBadge(count){
+  if(count===undefined){const o=gOrders();count=o.filter(x=>x.msgs&&x.msgs.some(m=>m.role!=='client'&&!m.rc)).length}
+  const b=document.getElementById('ordersBadge');
+  if(count>0){b.textContent=count;b.style.display='flex'}else{b.style.display='none'}
+}
+
+function toast(msg,type=''){
+  const w=document.getElementById('toast');
+  const el=document.createElement('div');
+  el.className='toast-item'+(type?' '+type:'');
+  el.textContent=msg;
+  w.appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+initDB();
+updateOrderBadge();
+</script>
+</body>
+</html>
